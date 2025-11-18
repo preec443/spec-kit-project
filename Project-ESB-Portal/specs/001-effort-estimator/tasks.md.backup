@@ -1,0 +1,332 @@
+# Tasks: Integration Effort Estimator
+
+**Input**: Design documents from `/specs/001-effort-estimator/`
+**Prerequisites**: plan.md (required), spec.md (required for user stories)
+
+**Tests**: Tests are MANDATORY for the Integration Effort Estimator per Constitution Principle VI (Test-First Development). All calculation functions require unit tests; main user flow requires component test(s).
+
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- Include exact file paths in descriptions
+
+## Path Conventions
+
+- **Frontend-only project**: `src/`, `tests/` at repository root
+- Paths shown below use this structure as defined in plan.md
+
+---
+
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: Project initialization and basic structure
+
+- [ ] T001 Initialize Vite React TypeScript project with `npm create vite@latest . -- --template react-ts`
+- [ ] T002 Install dependencies: `npm install react@^18.2.0 react-dom@^18.2.0`
+- [ ] T003 [P] Install dev dependencies: `npm install -D @testing-library/react@^14.0.0 @testing-library/user-event@^14.5.0 @types/react@^18.2.0 @types/react-dom@^18.2.0 @vitejs/plugin-react@^4.2.0 typescript@^5.3.0 vite@^5.0.0 vitest@^1.0.0 @vitest/ui jsdom @testing-library/jest-dom`
+- [ ] T004 [P] Configure tsconfig.json with strict mode enabled and target ES2020
+- [ ] T005 [P] Configure vite.config.ts with Vitest plugin and test environment setup
+- [ ] T006 Create directory structure: `mkdir -p src/{components,lib} tests/{unit,components} public`
+- [ ] T007 [P] Add test scripts to package.json: `"test": "vitest"`, `"test:ui": "vitest --ui"`, `"test:coverage": "vitest --coverage"`
+- [ ] T008 [P] Create .gitignore with node_modules, dist, coverage, .env entries
+
+**Checkpoint**: Project scaffolding complete - ready for implementation
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: Core type definitions and constants that ALL user stories depend on
+
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+
+- [ ] T009 Create src/lib/types.ts with FeatureType union type (5 options: 'Use Case / API', 'Topic / Event', 'Data Synchronization', 'Batch / File', 'ESB Feature')
+- [ ] T010 [P] Add Feature interface to src/lib/types.ts (id: string, type: FeatureType | '', projectCost: number, hardwareCost: number)
+- [ ] T011 [P] Add RoleAllocation interface to src/lib/types.ts (sa, qa, be, support, restMD, supportPlusRest: all numbers)
+- [ ] T012 [P] Add RolePercentages interface to src/lib/types.ts (sa, qa, be, support: all numbers)
+- [ ] T013 [P] Add ValidationResult interface to src/lib/types.ts (valid: boolean, error?: string, numericValue: number)
+- [ ] T014 Create src/lib/constants.ts with MD_DIVISOR = 5000
+- [ ] T015 [P] Add FEATURE_TYPES array to src/lib/constants.ts with all 5 feature type strings
+- [ ] T016 [P] Add ROLE_PERCENTAGES object to src/lib/constants.ts mapping each FeatureType to RolePercentages (Use Case/API: {sa:0.3, qa:0, be:0, support:0.7}, Topic/Event: same, Data Sync: {0.3,0.2,0.2,0.3}, Batch: {0.3,0.2,0.2,0.3}, ESB: {0.2,0.3,0.2,0.3})
+- [ ] T017 [P] Add ROLE_LABELS object to src/lib/constants.ts with display names for sa/qa/be/support roles
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+
+---
+
+## Phase 3: User Story 1 - Calculate Single Feature Effort (Priority: P1) 🎯 MVP
+
+**Goal**: Users can enter project name + one feature with costs and see calculated MD with role distribution
+
+**Independent Test**: Enter project name, add one feature (Use Case/API, 10000 THB project cost), verify Estimated MD = 2 and output table shows SA=0, QA=0, BE=0, Support=1, Rest=1, Support+Rest=2
+
+### Tests for User Story 1 (MANDATORY per Constitution) ✅
+
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [ ] T018 [P] [US1] Create tests/unit/calculations.test.ts with describe block for calculateEstimatedMD
+- [ ] T019 [P] [US1] Write unit test: calculateEstimatedMD(10000, 0) should return 2
+- [ ] T020 [P] [US1] Write unit test: calculateEstimatedMD(12500, 0) should return 2 (floor rounds down)
+- [ ] T021 [P] [US1] Write unit test: calculateEstimatedMD(0, 0) should return 0
+- [ ] T022 [P] [US1] Write unit test: calculateEstimatedMD(50000000, 0) should return 10000 (large numbers)
+- [ ] T023 [P] [US1] Write unit test: calculateEstimatedMD(12345.67, 0) should return 2 (fractional costs)
+- [ ] T024 [P] [US1] Add describe block for calculateRoleAllocations in tests/unit/calculations.test.ts
+- [ ] T025 [P] [US1] Write unit test: calculateRoleAllocations('Use Case / API', 2) returns {sa:0, qa:0, be:0, support:1, restMD:1, supportPlusRest:2}
+- [ ] T026 [P] [US1] Write unit test: calculateRoleAllocations('Data Synchronization', 10) returns {sa:3, qa:2, be:2, support:3, restMD:0, supportPlusRest:3}
+- [ ] T027 [P] [US1] Write unit test: calculateRoleAllocations('ESB Feature', 5) returns {sa:1, qa:1, be:1, support:1, restMD:1, supportPlusRest:2}
+- [ ] T028 [P] [US1] Write unit tests for all 5 feature types with various MD values (Topic/Event, Batch/File)
+
+### Implementation for User Story 1
+
+- [ ] T029 [US1] Implement calculateEstimatedMD(projectCost, hardwareCost) in src/lib/calculations.ts using Math.floor((projectCost + hardwareCost) / MD_DIVISOR)
+- [ ] T030 [US1] Run unit tests for calculateEstimatedMD - verify all tests pass (GREEN phase)
+- [ ] T031 [US1] Implement calculateRoleAllocations(featureType, estimatedMD) in src/lib/calculations.ts - calculate sa/qa/be/support using Math.floor(estimatedMD \* percentage), then restMD and supportPlusRest
+- [ ] T032 [US1] Run unit tests for calculateRoleAllocations - verify all tests pass (GREEN phase)
+- [ ] T033 [US1] Run `npm run test:coverage` and verify 100% coverage for calculateEstimatedMD and calculateRoleAllocations
+- [ ] T034 [US1] Create src/components/App.tsx with useState for projectName (string) and features (Feature[])
+- [ ] T035 [US1] Add addFeature handler to App.tsx that creates new Feature with uuid, empty type, 0 costs
+- [ ] T036 [US1] Add updateFeature handler to App.tsx that updates feature by id and field name
+- [ ] T037 [US1] Create src/components/ProjectForm.tsx with props (projectName, onProjectNameChange)
+- [ ] T038 [US1] Implement ProjectForm.tsx rendering text input with label "Project Name" and required indicator
+- [ ] T039 [US1] Create src/components/FeatureInputTable.tsx with props (features, onAddFeature, onUpdateFeature, onDeleteFeature)
+- [ ] T040 [US1] Implement FeatureInputTable.tsx rendering semantic <table> with <thead> containing columns: Feature Type, Project Cost (THB), Hardware Cost (THB), Estimated MD, Actions
+- [ ] T041 [US1] Add "Add Feature" button below table in FeatureInputTable.tsx
+- [ ] T042 [US1] Create src/components/FeatureRow.tsx with props (feature, onUpdate, onDelete)
+- [ ] T043 [US1] Implement FeatureRow.tsx rendering <tr> with <select> dropdown for feature type using FEATURE_TYPES from constants
+- [ ] T044 [US1] Add two <input type="number"> fields in FeatureRow.tsx for projectCost and hardwareCost
+- [ ] T045 [US1] Calculate and display estimatedMD in FeatureRow.tsx using calculateEstimatedMD(feature.projectCost || 0, feature.hardwareCost || 0)
+- [ ] T046 [US1] Create src/components/MandayTable.tsx with props (features)
+- [ ] T047 [US1] Implement MandayTable.tsx rendering semantic <table> with columns: Feature, SA (MD), QA (MD), BE (MD), Support (MD), Rest MD, Support + Rest MD
+- [ ] T048 [US1] Map features array in MandayTable.tsx to table rows, calculating roleAllocations for each feature and displaying values
+- [ ] T049 [US1] Wire up components in App.tsx: render ProjectForm, FeatureInputTable, and MandayTable with state/handlers
+- [ ] T050 [US1] Create src/main.tsx as React app entry point rendering <App />
+- [ ] T051 [US1] Create public/index.html with root div and app title "Integration Effort Estimator"
+- [ ] T052 [US1] Manual test: `npm run dev`, open browser, enter project name, add one feature, enter costs, verify calculations display
+
+### Component Tests for User Story 1
+
+- [ ] T053 [US1] Create tests/components/App.test.tsx with test "calculates and displays MD for a single feature"
+- [ ] T054 [US1] Write test: render <App />, enter project name, click Add Feature, select Use Case/API, enter 10000 in project cost, verify "2" appears for Estimated MD
+- [ ] T055 [US1] Write test: verify output table renders with correct role values (SA=0, QA=0, BE=0, Support=1, Rest=1, Support+Rest=2)
+- [ ] T056 [US1] Write test "updates output table when costs change": change project cost from 10000 to 15000, verify MD updates to 3 and table recalculates
+- [ ] T057 [US1] Write test "updates allocations when feature type changes": switch from Use Case/API to Data Synchronization, verify percentages change
+- [ ] T058 [US1] Run component tests with `npm test` - verify all US1 tests pass
+
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (MVP complete)
+
+---
+
+## Phase 4: User Story 2 - Manage Multiple Integration Features (Priority: P2)
+
+**Goal**: Users can add multiple features, see calculations for each, and view totals
+
+**Independent Test**: Add 3 features with different types/costs, verify output table has 3 rows + Total row with correct sums
+
+### Tests for User Story 2 (MANDATORY per Constitution) ✅
+
+- [ ] T059 [P] [US2] Add describe block for calculateTotals in tests/unit/calculations.test.ts
+- [ ] T060 [P] [US2] Write unit test: calculateTotals([]) returns all zero RoleAllocation
+- [ ] T061 [P] [US2] Write unit test: calculateTotals with 3 features of different types returns correct sums for each role column
+- [ ] T062 [P] [US2] Write component test in tests/components/App.test.tsx: "displays total row summing all features"
+- [ ] T063 [P] [US2] Write test: add 3 features, verify output table has 4 rows (3 features + Total), verify Total row values match sum
+
+### Implementation for User Story 2
+
+- [ ] T064 [US2] Implement calculateTotals(features) in src/lib/calculations.ts - iterate features, sum all role allocations
+- [ ] T065 [US2] Run unit tests for calculateTotals - verify all tests pass
+- [ ] T066 [US2] Run `npm run test:coverage` - verify 100% coverage maintained
+- [ ] T067 [US2] Update MandayTable.tsx to call calculateTotals(features) and render Total row in <tfoot>
+- [ ] T068 [US2] Style Total row in MandayTable.tsx with bold text or distinct background
+- [ ] T069 [US2] Add delete button to FeatureRow.tsx calling onDelete prop
+- [ ] T070 [US2] Add deleteFeature handler to App.tsx that removes feature by id from state
+- [ ] T071 [US2] Add empty state handling in MandayTable.tsx: show "No features added yet" when features array is empty
+- [ ] T072 [US2] Manual test: add 3 features with varying costs, verify Total row sums correctly
+- [ ] T073 [US2] Manual test: delete middle feature, verify Total recalculates excluding deleted feature
+- [ ] T074 [US2] Run component tests - verify US2 tests pass
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+
+---
+
+## Phase 5: User Story 3 - Handle Empty and Invalid Inputs Gracefully (Priority: P3)
+
+**Goal**: Clear validation errors for negative/invalid inputs; empty fields treated as 0
+
+**Independent Test**: Leave cost empty (treats as 0), enter negative (-500), enter text ("abc") - verify appropriate errors/behavior
+
+### Tests for User Story 3 (MANDATORY per Constitution) ✅
+
+- [ ] T075 [P] [US3] Add describe block for validateCostInput in tests/unit/calculations.test.ts
+- [ ] T076 [P] [US3] Write unit test: validateCostInput('') returns {valid:true, numericValue:0, error:undefined}
+- [ ] T077 [P] [US3] Write unit test: validateCostInput('1000') returns {valid:true, numericValue:1000, error:undefined}
+- [ ] T078 [P] [US3] Write unit test: validateCostInput('-500') returns {valid:false, error:'Cost cannot be negative', numericValue:0}
+- [ ] T079 [P] [US3] Write unit test: validateCostInput('abc') returns {valid:false, error:'Must be a valid number', numericValue:0}
+- [ ] T080 [P] [US3] Write component test in tests/components/App.test.tsx: "shows error for negative cost"
+- [ ] T081 [P] [US3] Write test: enter -500 in hardware cost, blur field, verify error message "Hardware cost cannot be negative" appears
+
+### Implementation for User Story 3
+
+- [ ] T082 [US3] Implement validateCostInput(value: string) in src/lib/calculations.ts with validation logic for empty/negative/non-numeric
+- [ ] T083 [US3] Run unit tests for validateCostInput - verify all tests pass
+- [ ] T084 [US3] Run `npm run test:coverage` - verify 100% coverage maintained
+- [ ] T085 [US3] Add validation state to FeatureRow.tsx: useState for projectCostError and hardwareCostError
+- [ ] T086 [US3] Add onBlur handler to project cost input in FeatureRow.tsx calling validateCostInput and setting error state
+- [ ] T087 [US3] Add onBlur handler to hardware cost input in FeatureRow.tsx calling validateCostInput and setting error state
+- [ ] T088 [US3] Display inline error messages in FeatureRow.tsx below cost inputs when validation fails
+- [ ] T089 [US3] Add CSS class to highlight invalid fields in FeatureRow.tsx (red border or background)
+- [ ] T090 [US3] Add validation for feature type dropdown: disable calculation or show message if type not selected
+- [ ] T091 [US3] Manual test: leave costs empty, verify treated as 0 with no errors
+- [ ] T092 [US3] Manual test: enter negative value, blur field, verify error message displays
+- [ ] T093 [US3] Manual test: enter non-numeric text, blur field, verify error message displays
+- [ ] T094 [US3] Run component tests - verify US3 tests pass
+
+**Checkpoint**: All 3 user stories complete with validation and error handling
+
+---
+
+## Phase 6: Polish & Cross-Cutting Concerns
+
+**Purpose**: Accessibility, styling, performance verification, documentation
+
+- [ ] T095 [P] Create src/App.css with table styling (borders, padding, header background)
+- [ ] T096 [P] Add CSS for Total row styling (bold font-weight, distinct background color)
+- [ ] T097 [P] Add CSS for error states (red border, red text for error messages)
+- [ ] T098 [P] Add CSS for responsive layout (table scrolls horizontally on small screens)
+- [ ] T099 [P] Add ARIA label to project name input in ProjectForm.tsx
+- [ ] T100 [P] Add ARIA labels to cost inputs in FeatureRow.tsx
+- [ ] T101 [P] Add aria-label to feature type dropdown in FeatureRow.tsx
+- [ ] T102 [P] Add proper <th scope="col"> to table headers in FeatureInputTable.tsx and MandayTable.tsx
+- [ ] T103 [P] Verify tab order: project name → feature type → project cost → hardware cost → delete → add feature
+- [ ] T104 [P] Test keyboard navigation: ensure all interactive elements accessible via Tab/Shift+Tab
+- [ ] T105 [P] Add focus styles to all interactive elements (visible outline on focus)
+- [ ] T106 Performance test: add 20 features, measure calculation time with console.time() - verify <100ms
+- [ ] T107 Performance test: add 50 features, verify no lag or performance degradation
+- [ ] T108 [P] Add JSDoc comments to all functions in src/lib/calculations.ts documenting parameters, returns, and formulas
+- [ ] T109 [P] Add README.md at repository root with project description, setup instructions, and npm scripts
+- [ ] T110 [P] Add inline code comments in complex calculation logic explaining Rest MD calculation
+- [ ] T111 Run full test suite with `npm test` - verify all unit and component tests pass
+- [ ] T112 Run `npm run test:coverage` - verify 100% coverage of src/lib/calculations.ts
+- [ ] T113 Run TypeScript compiler `npx tsc --noEmit` - verify no compilation errors
+- [ ] T114 Run build `npm run build` - verify production build succeeds
+- [ ] T115 Manual accessibility audit: test with keyboard only (no mouse), verify all features accessible
+- [ ] T116 Cross-browser testing: verify app works in Chrome, Firefox, Safari, Edge
+
+---
+
+## Dependencies and Parallel Execution
+
+### Phase Dependencies (Sequential)
+
+- Phase 1 (Setup) → Phase 2 (Foundational) → Phase 3, 4, 5 (User Stories in parallel) → Phase 6 (Polish)
+
+### User Story Dependencies
+
+- **US1 is foundational**: Must be complete before US2 (multiple features builds on single feature)
+- **US3 is independent**: Can be developed in parallel with US2 after US1 complete
+- **Recommended order**: US1 → US2 → US3 (matches priority P1→P2→P3)
+
+### Parallel Execution Opportunities (by Phase)
+
+**Phase 1 (Setup)**: T002-T008 can run in parallel after T001
+**Phase 2 (Foundational)**: T010-T013 parallel (types), T015-T017 parallel (constants)
+**Phase 3 (US1 Tests)**: T018-T028 all parallel (independent test files)
+**Phase 4 (US2 Tests)**: T059-T063 all parallel
+**Phase 5 (US3 Tests)**: T075-T081 all parallel
+**Phase 6 (Polish)**: Most tasks (T095-T110) are parallel - CSS, ARIA, docs are independent
+
+### Example Parallel Work Sessions
+
+**Session 1 (After Phase 2 complete)**:
+
+- Developer A: T018-T028 (write all unit tests for US1)
+- Developer B: T034-T042 (build App, ProjectForm, FeatureInputTable components)
+
+**Session 2 (US1 implementation)**:
+
+- Developer A: T029-T033 (implement calculation functions)
+- Developer B: T043-T052 (complete FeatureRow, MandayTable, wire up components)
+
+**Session 3 (US2 + US3 in parallel)**:
+
+- Developer A: T059-T074 (US2: multiple features + totals)
+- Developer B: T075-T094 (US3: validation)
+
+---
+
+## Implementation Strategy
+
+### MVP First (Phase 3 = User Story 1)
+
+Complete Phase 1-3 (Setup + Foundational + US1) for minimal viable product. This delivers:
+
+- Working calculation engine with 100% test coverage
+- Single feature input with real-time calculation
+- Output table with role distribution
+- Foundation for all other features
+
+**MVP Delivery**: After T058, you have a fully functional (though basic) estimator
+
+### Incremental Value Delivery
+
+- **After US1**: Can demonstrate core calculation to stakeholders
+- **After US2**: Can handle realistic multi-feature projects
+- **After US3**: Production-ready with proper validation
+
+### Test-First Workflow (Per Constitution)
+
+For each user story:
+
+1. Write tests first (RED phase) - tests fail
+2. Implement minimum code to pass tests (GREEN phase)
+3. Verify coverage, refactor if needed (REFACTOR phase)
+4. Write component tests
+5. Manual verification
+
+---
+
+## Acceptance Validation
+
+Before marking implementation complete, verify all items in plan.md Acceptance Checklist:
+
+- [ ] All 20 functional requirements (FR-001 to FR-020) implemented
+- [ ] All 7 constitution principles satisfied
+- [ ] All unit tests pass with 100% coverage of calculation functions
+- [ ] Component tests pass for all 3 user stories
+- [ ] Input validation works (negative/invalid show errors, empty→0)
+- [ ] Math.floor() used consistently
+- [ ] Output table displays all 7 columns
+- [ ] Total row sums correctly
+- [ ] Real-time reactivity works
+- [ ] Performance: 20 features <100ms
+- [ ] Accessibility: keyboard navigation + ARIA labels
+- [ ] Table semantics: proper <table> structure
+- [ ] TypeScript compiles with strict mode, no errors
+
+---
+
+## Task Summary
+
+- **Total Tasks**: 116
+- **Phase 1 (Setup)**: 8 tasks
+- **Phase 2 (Foundational)**: 9 tasks (BLOCKING)
+- **Phase 3 (US1)**: 41 tasks (MVP - includes tests + implementation + component tests)
+- **Phase 4 (US2)**: 16 tasks
+- **Phase 5 (US3)**: 20 tasks
+- **Phase 6 (Polish)**: 22 tasks
+
+**Parallel Opportunities**: ~40-50 tasks marked [P] can run in parallel with others in their phase
+
+**Estimated Effort** (rough guideline):
+
+- Setup: 1-2 hours
+- Foundational: 1 hour
+- US1 (MVP): 6-8 hours (TDD with tests)
+- US2: 2-3 hours
+- US3: 2-3 hours
+- Polish: 2-3 hours
+- **Total**: ~15-20 hours for single developer, ~10-12 hours with 2 developers leveraging parallelism
+
+**Critical Path**: T001→T009→T018→T029→T034→T053 (Setup→Types→Tests→Calculations→Components→Integration Tests) = MVP

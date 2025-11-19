@@ -10,7 +10,7 @@
 ## Format: `- [ ] [ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3, US4)
 - Include exact file paths in descriptions
 
 ## Project Structure
@@ -18,26 +18,26 @@
 This is a **single-project frontend-only application** using:
 
 - **Framework**: React 18+ with TypeScript 5.3+
-- **Build Tool**: Vite 5+
-- **Testing**: Vitest + React Testing Library
+- **Build Tool**: Any standard React build tool (e.g., Create React App, Next.js, or Webpack)
+- **Testing**: Jest + React Testing Library (or any React-compatible test runner)
 - **Paths**: `src/` and `tests/` at repository root
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Project initialization, Vite scaffolding, and basic configuration
+**Purpose**: Project initialization, React scaffolding, and basic configuration
 
 **Duration**: ~1-2 hours
 
-- [ ] T001 Create Vite React TypeScript project using `npm create vite@latest . -- --template react-ts`
+- [ ] T001 Create a React 18+ + TypeScript 5+ project using the team's preferred React build tool (e.g., Create React App, Next.js, or Webpack)
 - [ ] T002 Install dependencies: `npm install react@^18.2.0 react-dom@^18.2.0`
-- [ ] T003 Install dev dependencies: `npm install -D @testing-library/react@^14.0.0 @testing-library/user-event@^14.5.0 @vitejs/plugin-react@^4.2.0 jsdom@^23.0.0 typescript@^5.3.0 vite@^5.0.0 vitest@^1.0.0`
+- [ ] T003 Install dev dependencies: `npm install -D @testing-library/react@^14.0.0 @testing-library/user-event@^14.5.0 @types/jest@^29.0.0 jest@^29.0.0 jest-environment-jsdom@^29.0.0 ts-jest@^29.0.0 typescript@^5.3.0`
 - [ ] T004 Configure tsconfig.json with strict mode: `"strict": true, "noUnusedLocals": true, "noUnusedParameters": true`
-- [ ] T005 Configure vite.config.ts with Vitest plugin: add `test: { globals: true, environment: 'jsdom', setupFiles: './src/test/setup.ts' }`
+- [ ] T005 Configure Jest for TypeScript and React: create jest.config.js with `preset: '\''ts-jest'\'', testEnvironment: '\''jsdom'\'', setupFilesAfterEnv: ['\''<rootDir>/src/setupTests.ts'\'']`
 - [ ] T006 Create directory structure: `src/components/`, `src/lib/`, `tests/unit/`, `tests/components/`
-- [ ] T007 Add test scripts to package.json: `"test": "vitest", "test:ui": "vitest --ui", "test:coverage": "vitest --coverage"`
-- [ ] T008 Create .gitignore with node_modules/, dist/, coverage/, .env
+- [ ] T007 Add test scripts to package.json: `"test": "jest", "test:watch": "jest --watch", "test:coverage": "jest --coverage"`
+- [ ] T008 Create .gitignore with node_modules/, dist/, build/, coverage/, .env
 
 **Checkpoint**: Project structure ready - foundation work can begin
 
@@ -93,7 +93,7 @@ This is a **single-project frontend-only application** using:
 
 ### Basic Component Structure
 
-- [ ] T025 [P] [US1] Create src/components/App.tsx with state: `const [projectName, setProjectName] = useState<string>(''); const [features, setFeatures] = useState<Feature[]>([]);`
+- [ ] T025 [P] [US1] Create src/components/App.tsx with state: `const [projectName, setProjectName] = useState<string>('\'\''); const [features, setFeatures] = useState<Feature[]>([]);`
 - [ ] T026 [P] [US1] Create src/components/ProjectForm.tsx with props: projectName, onProjectNameChange
 - [ ] T027 [P] [US1] Create src/components/FeatureInputTable.tsx with props: features, onAddFeature, onUpdateFeature, onDeleteFeature
 - [ ] T028 [P] [US1] Create src/components/FeatureRow.tsx with props: feature, onUpdate, onDelete
@@ -111,14 +111,14 @@ This is a **single-project frontend-only application** using:
 - [ ] T034 [US1] Add table header row with `<th scope="col">` for each column in FeatureInputTable.tsx
 - [ ] T035 [US1] Map features array to FeatureRow components in `<tbody>` of FeatureInputTable.tsx
 - [ ] T036 [US1] Add "Add Feature" button below table in FeatureInputTable.tsx that calls onAddFeature()
-- [ ] T037 [US1] Add empty state message in FeatureInputTable.tsx: "No features added yet. Click 'Add Feature' to begin."
+- [ ] T037 [US1] Add empty state message in FeatureInputTable.tsx: "No features added yet. Click '\''Add Feature'\'' to begin."
 
 ### Implement FeatureRow Component (Single Feature Input)
 
 - [ ] T038 [US1] Implement FeatureRow.tsx: render `<tr>` with 5 `<td>` cells for type dropdown, project cost input, hardware cost input, estimated MD display, delete button
-- [ ] T039 [US1] Add feature type dropdown in FeatureRow.tsx: `<select>` with options from FEATURE_TYPES constant, bind to feature.type, call onUpdate('type', value)
-- [ ] T040 [US1] Add project cost input in FeatureRow.tsx: `<input type="number">`, bind to feature.projectCost, call onUpdate('projectCost', numericValue)
-- [ ] T041 [US1] Add hardware cost input in FeatureRow.tsx: `<input type="number">`, bind to feature.hardwareCost, call onUpdate('hardwareCost', numericValue)
+- [ ] T039 [US1] Add feature type dropdown in FeatureRow.tsx: `<select>` with options from FEATURE_TYPES constant, bind to feature.type, call onUpdate('\''type'\'', value)
+- [ ] T040 [US1] Add project cost input in FeatureRow.tsx: `<input type="number">`, bind to feature.projectCost, call onUpdate('\''projectCost'\'', numericValue)
+- [ ] T041 [US1] Add hardware cost input in FeatureRow.tsx: `<input type="number">`, bind to feature.hardwareCost, call onUpdate('\''hardwareCost'\'', numericValue)
 - [ ] T042 [US1] Calculate and display estimatedMD in FeatureRow.tsx: call calculateEstimatedMD(feature.projectCost, feature.hardwareCost), display result with "MD" suffix
 - [ ] T043 [US1] Add delete button in FeatureRow.tsx: `<button>` with "Delete" text or icon, calls onDelete()
 - [ ] T044 [US1] Add ARIA labels to all inputs in FeatureRow.tsx: "Feature type", "Project cost in Thai Baht", "Hardware cost in Thai Baht"
@@ -134,7 +134,7 @@ This is a **single-project frontend-only application** using:
 
 ### Wire Up App Component (Data Flow)
 
-- [ ] T051 [US1] Implement addFeature() handler in App.tsx: push new feature with `{ id: crypto.randomUUID(), type: '', projectCost: 0, hardwareCost: 0 }` to features array
+- [ ] T051 [US1] Implement addFeature() handler in App.tsx: push new feature with `{ id: crypto.randomUUID(), type: '\'\'', projectCost: 0, hardwareCost: 0 }` to features array
 - [ ] T052 [US1] Implement updateFeature(id, field, value) handler in App.tsx: use immutable update pattern `features.map(f => f.id === id ? { ...f, [field]: value } : f)`
 - [ ] T053 [US1] Implement deleteFeature(id) handler in App.tsx: filter features array `features.filter(f => f.id !== id)`
 - [ ] T054 [US1] Calculate derived data in App.tsx: `const calculations = features.map(f => ({ featureId: f.id, estimatedMD: calculateEstimatedMD(...), roleAllocations: calculateRoleAllocations(f.type, estimatedMD) }))`
@@ -151,7 +151,7 @@ This is a **single-project frontend-only application** using:
 
 ### Manual Testing & Bug Fixes for US1
 
-- [ ] T062 [US1] Run `npm run dev`, open http://localhost:5173, manually test US1 Scenario 1 (single feature calculation)
+- [ ] T062 [US1] Run the dev server command (e.g., `npm start` or `npm run dev`), open the application in browser, manually test US1 Scenario 1 (single feature calculation)
 - [ ] T063 [US1] Manually test US1 Scenario 2 (real-time updates when costs change)
 - [ ] T064 [US1] Manually test US1 Scenario 3 (feature type change updates role percentages)
 - [ ] T065 [US1] Fix any bugs discovered during manual testing
@@ -232,7 +232,7 @@ This is a **single-project frontend-only application** using:
 
 - [ ] T093 [US3] Add validation to FeatureRow.tsx: if feature.type is empty string, display message "Feature type is required" in place of estimatedMD
 - [ ] T094 [US3] Conditionally disable estimatedMD display in FeatureRow.tsx if type not selected: show "—" or "N/A" instead of 0
-- [ ] T095 [US3] Update MandayTable.tsx to skip rows where feature.type is empty (don't include in calculations or display)
+- [ ] T095 [US3] Update MandayTable.tsx to skip rows where feature.type is empty (don'\''t include in calculations or display)
 
 ### Manual Testing & Bug Fixes for US3
 
@@ -288,11 +288,11 @@ This is a **single-project frontend-only application** using:
 - [ ] T120 Test all edge cases from spec.md: zero costs, large numbers (50M), fractional costs (12345.67), all roles zero, maximum 50 features
 - [ ] T121 Cross-browser testing: verify functionality in Chrome, Firefox, Safari, Edge
 - [ ] T122 Run full test suite with coverage: `npm run test:coverage`, verify 100% coverage of src/lib/calculations.ts, verify all component tests pass
-- [ ] T123 Build production bundle: `npm run build`, verify no TypeScript errors, verify dist/ output size <200KB gzipped
-- [ ] T124 Preview production build: `npm run preview`, test functionality in production mode
+- [ ] T123 Build production bundle: run the build command defined in package.json, verify no TypeScript errors, verify output size <200KB gzipped
+- [ ] T124 Preview production build: run the preview/serve command if available, test functionality in production mode
 - [ ] T125 Run linter (if configured): `npm run lint`, fix any errors or warnings
 - [ ] T126 Review Constitution Check in plan.md: verify all 7 principles satisfied, document any justified exceptions
-- [ ] T127 Create plan.md's Acceptance Checklist verification: mark all 15+ items as complete
+- [ ] T127 Create plan.md'\''s Acceptance Checklist verification: mark all 15+ items as complete
 
 **Checkpoint**: Application complete, tested, and ready for deployment! 🎉
 
@@ -316,15 +316,15 @@ This is a **single-project frontend-only application** using:
 ### Implement RoleSelector and View State
 
 - [ ] T132 [P] [US4] Create src/components/RoleSelector.tsx with four checkboxes (SA, QA, BE, Support) bound to selectedRoles prop and onChange callback
-- [ ] T133 [US4] In App.tsx, add selectedRoles state with default ['sa','qa','be','support'] and pass it to RoleSelector and MandayTable
+- [ ] T133 [US4] In App.tsx, add selectedRoles state with default ['\''sa'\'','\''qa'\'','\''be'\'','\''support'\''] and pass it to RoleSelector and MandayTable
 - [ ] T134 [US4] Implement logic in RoleSelector and App.tsx that prevents the user from unchecking the last remaining role and displays an inline message such as "At least one role must be selected."
 
 ### Implement OutputView and Navigation
 
-- [ ] T135 [US4] Add activeView state to App.tsx with values 'input' | 'output', default 'input'
-- [ ] T136 [P] [US4] Create src/components/OutputView.tsx that renders MandayTable and a 'Back to Input' button
+- [ ] T135 [US4] Add activeView state to App.tsx with values '\''input'\'' | '\''output'\'', default '\''input'\''
+- [ ] T136 [P] [US4] Create src/components/OutputView.tsx that renders MandayTable and a '\''Back to Input'\'' button
 - [ ] T137 [US4] In App.tsx, conditionally render either the Input layout (ProjectForm + RoleSelector + FeatureInputTable) or the OutputView component based on activeView
-- [ ] T138 [US4] Add a "View Output" button in the Input layout that switches activeView to 'output'
+- [ ] T138 [US4] Add a "View Output" button in the Input layout that switches activeView to '\''output'\''
 
 ### Update MandayTable for Dynamic Columns
 
@@ -395,7 +395,7 @@ Phase 2 (Foundational - Pure Functions)
 
 ### US1 Independent Test
 
-✅ Can run without US2/US3 features
+✅ Can run without US2/US3/US4 features
 
 - Create new project in clean browser
 - Enter project name "Test Project"
@@ -409,7 +409,7 @@ Phase 2 (Foundational - Pure Functions)
 
 ### US2 Independent Test
 
-✅ Can run after US1, without US3
+✅ Can run after US1, without US3/US4
 
 - Complete US1 test above
 - Click "Add Feature" 2 more times
@@ -422,7 +422,7 @@ Phase 2 (Foundational - Pure Functions)
 
 ### US3 Independent Test
 
-✅ Can run after US1, without US2
+✅ Can run after US1, without US2/US4
 
 - Create new project, add one feature
 - Leave both cost fields empty
@@ -486,6 +486,18 @@ Then incrementally add:
 - After Phase 3: Review MVP functionality (US1 complete)
 - After Phase 7: Review role selection and view navigation (US4 complete)
 - After Phase 6: Final review before deployment
+
+---
+
+## Technology Summary
+
+**Stack**: React 18+ + TypeScript 5.3+ frontend, tested with Jest + React Testing Library
+
+**Build Tool**: Flexible - use any standard React build tool (Create React App, Next.js, Webpack, etc.)
+
+**Architecture**: Frontend-only SPA with pure function business logic, no backend required
+
+**Test Coverage**: 100% unit test coverage for calculation functions, component tests for all user stories
 
 ---
 

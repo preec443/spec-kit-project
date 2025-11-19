@@ -10,9 +10,9 @@ The Integration Effort Estimator is a frontend-only React/TypeScript web applica
 ## Technical Context
 
 **Language/Version**: TypeScript 5.3+ with strict mode enabled  
-**Primary Dependencies**: React 18+, Vite 5+ (build tool)  
+**Primary Dependencies**: React 18+ application built with any standard React build tool (e.g., CRA, Next.js, or Webpack). The framework choice is flexible and not constrained.  
 **Storage**: N/A (in-memory React state only; no persistence in v1.0)  
-**Testing**: Vitest (unit tests) + React Testing Library (component tests)  
+**Testing**: Use any React-compatible testing framework (e.g., Jest + React Testing Library, React Testing Library)  
 **Target Platform**: Modern web browsers (Chrome, Firefox, Safari, Edge from last 2 years)  
 **Project Type**: Frontend-only web application (single-page app)  
 **Performance Goals**: <100ms calculation time for 20 features; <2s initial page load on 3G  
@@ -28,7 +28,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 - [x] **Table-Based UI**: Design uses table/grid layouts for inputs and outputs ✅ HTML tables for input rows and output table
 - [x] **Input Validation**: All currency fields have non-negative validation; empty treated as 0 ✅ Validation logic in form handlers
 - [x] **Integer MD with Round-Down**: Formula uses `Math.floor()` for manday calculations ✅ All calculation functions use Math.floor()
-- [x] **Test-First Development**: Unit tests for all calculations + component test for main flow ✅ Vitest unit tests + RTL component tests planned
+- [x] **Test-First Development**: Unit tests for all calculations + component test for main flow ✅ + RTL component tests planned
 - [x] **Documentation Separation**: Constitution, spec, plan, and tasks are distinct artifacts ✅ This plan is separate from spec.md
 
 ## Project Structure
@@ -62,8 +62,7 @@ src/
 │   ├── types.ts                   # TypeScript interfaces (Feature, RoleAllocation, etc.)
 │   └── constants.ts               # Feature types, role percentages config
 ├── App.css                        # Global styles (or CSS modules per component)
-├── main.tsx                       # React app entry point
-└── vite-env.d.ts                  # Vite type declarations
+└── main.tsx                       # React app entry point
 
 tests/
 ├── unit/
@@ -74,12 +73,11 @@ tests/
 public/
 └── index.html                     # HTML shell
 
-package.json                       # Dependencies: react, typescript, vite, vitest, @testing-library/react
+package.json                       # Dependencies: react, typescript, @testing-library/react
 tsconfig.json                      # TypeScript strict mode config
-vite.config.ts                     # Vite build config + Vitest setup
 ```
 
-**Structure Decision**: Frontend-only web application using Vite for fast development and build. All business logic isolated in `src/lib/calculations.ts` as pure functions (Constitution Principle II). Components in `src/components/` follow single-responsibility principle. Tests co-located by type (unit vs component) for clarity. No backend directories since this is v1.0 frontend-only (Constitution Principle I).
+**Structure Decision**: Frontend-only web application using any standard React build tool. All business logic isolated in `src/lib/calculations.ts` as pure functions (Constitution Principle II). Components in `src/components/` follow single-responsibility principle. Tests co-located by type (unit vs component) for clarity. No backend directories since this is v1.0 frontend-only (Constitution Principle I).
 
 ## Complexity Tracking
 
@@ -536,7 +534,7 @@ export const ROLE_LABELS = {
 
 **Coverage**: 100% of all functions in `src/lib/calculations.ts` (Constitution Principle VI)
 
-**Framework**: Vitest with describe/it/expect assertions
+**Framework**: Any React-compatible testing framework with describe/it/expect assertions (e.g., Jest)
 
 **Test Structure**:
 
@@ -598,7 +596,7 @@ describe("validateCostInput", () => {
 
 **Coverage**: At least one end-to-end test covering main user flow (Constitution Principle VI)
 
-**Framework**: Vitest + React Testing Library
+**Framework**: Any React-compatible testing framework + React Testing Library (e.g., Jest + RTL, RTL)
 
 **Test Scenarios** (aligned with User Stories):
 
@@ -669,10 +667,10 @@ it("shows error for negative cost", async () => {
 
 ### Phase 0: Project Setup
 
-1. Initialize Vite React TypeScript project
-2. Install dependencies: react, typescript, vite, vitest, @testing-library/react
+1. Initialize React TypeScript project with chosen build tool
+2. Install dependencies: react, typescript, testing framework, @testing-library/react
 3. Configure tsconfig.json with strict mode
-4. Configure vite.config.ts with Vitest plugin
+4. Configure test framework setup
 5. Create directory structure: src/{components,lib}, tests/{unit,components}
 
 ### Phase 1: Pure Functions + Unit Tests (TDD)
@@ -684,7 +682,7 @@ it("shows error for negative cost", async () => {
 5. Implement `calculateRoleAllocations()` → tests pass (GREEN)
 6. Implement `calculateTotals()` → tests pass (GREEN)
 7. Implement `validateCostInput()` → tests pass (GREEN)
-8. Verify 100% coverage: `npm run test:coverage`
+8. Verify 100% coverage: run test coverage command
 
 ### Phase 2: Basic Components (User Story 1 - MVP)
 
@@ -823,21 +821,20 @@ it("shows error for negative cost", async () => {
     "@testing-library/user-event": "^14.5.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.2.0",
-    "typescript": "^5.3.0",
-    "vite": "^5.0.0",
-    "vitest": "^1.0.0"
+    "typescript": "^5.3.0"
   }
 }
 ```
+
+**Note**: Additional build tool and testing framework dependencies should be added based on your chosen toolchain (e.g., CRA + Jest, Webpack + Jest, etc.).
 
 **Rationale**:
 
 - **React 18+**: Per Constitution technical constraints
 - **TypeScript 5+**: Strict mode support, latest type features
-- **Vite**: Fast dev server, optimal for frontend-only SPA
-- **Vitest**: Native Vite integration, faster than Jest for this stack
 - **React Testing Library**: Standard for React component testing
+- **Build Tool Flexibility**: Choose any standard React build tool (CRA, Next.js, Webpack) based on team preference
+- **Testing Framework Flexibility**: Choose any React-compatible test runner (Jest) based on build tool selection
 - **No CSS framework**: Keep codebase small per user request; use CSS modules or plain CSS
 
 ---

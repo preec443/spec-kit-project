@@ -16,6 +16,7 @@
 ## Project Structure
 
 This is a **single-project frontend-only application** using:
+
 - **Framework**: React 18+ with TypeScript 5.3+
 - **Build Tool**: Vite 5+
 - **Testing**: Vitest + React Testing Library
@@ -101,7 +102,7 @@ This is a **single-project frontend-only application** using:
 ### Implement ProjectForm Component
 
 - [ ] T030 [US1] Implement ProjectForm.tsx: render text input with label "Project Name", bind value to projectName prop, call onProjectNameChange on input change
-- [ ] T031 [US1] Add required indicator (*) to project name label in ProjectForm.tsx
+- [ ] T031 [US1] Add required indicator (\*) to project name label in ProjectForm.tsx
 - [ ] T032 [US1] Add ARIA label to project name input: `aria-label="Project name (required)"`
 
 ### Implement FeatureInputTable Component
@@ -297,17 +298,63 @@ This is a **single-project frontend-only application** using:
 
 ---
 
+## Phase 7: User Story 4 - Role Selection & Output Navigation (Priority: P2)
+
+**Goal**: Allow users to choose which roles are in scope via checkboxes in the Input view and show only those roles in the Output table on a dedicated Output view, while keeping all calculations unchanged.
+
+**Independent Test**: Check all four role checkboxes by default, uncheck QA and BE, navigate to Output view, verify only SA and Support columns are visible in the output table (plus Feature, Rest MD, Support + Rest MD which are always visible), verify calculations remain accurate.
+
+**Duration**: ~2-3 hours
+
+### Component Tests for US4 (TDD - Write First) ✅
+
+- [ ] T128 [US4] Write component test in tests/components/App.test.tsx: "toggles visible role columns using RoleSelector checkboxes"
+- [ ] T129 [US4] Write component test: "prevents unchecking the last remaining role and shows helper message"
+- [ ] T130 [US4] Write component test: "navigates between Input and Output views without losing feature data"
+- [ ] T131 [US4] Write component test: "editing costs in Input view updates Output view after navigation"
+
+### Implement RoleSelector and View State
+
+- [ ] T132 [P] [US4] Create src/components/RoleSelector.tsx with four checkboxes (SA, QA, BE, Support) bound to selectedRoles prop and onChange callback
+- [ ] T133 [US4] In App.tsx, add selectedRoles state with default ['sa','qa','be','support'] and pass it to RoleSelector and MandayTable
+- [ ] T134 [US4] Implement logic in RoleSelector and App.tsx that prevents the user from unchecking the last remaining role and displays an inline message such as "At least one role must be selected."
+
+### Implement OutputView and Navigation
+
+- [ ] T135 [US4] Add activeView state to App.tsx with values 'input' | 'output', default 'input'
+- [ ] T136 [P] [US4] Create src/components/OutputView.tsx that renders MandayTable and a 'Back to Input' button
+- [ ] T137 [US4] In App.tsx, conditionally render either the Input layout (ProjectForm + RoleSelector + FeatureInputTable) or the OutputView component based on activeView
+- [ ] T138 [US4] Add a "View Output" button in the Input layout that switches activeView to 'output'
+
+### Update MandayTable for Dynamic Columns
+
+- [ ] T139 [US4] Update MandayTable.tsx props to accept selectedRoles: RoleKey[]
+- [ ] T140 [US4] Implement dynamic table headers: only render SA (MD), QA (MD), BE (MD), and Support (MD) columns if their corresponding role keys exist in selectedRoles; always render Feature, Rest MD, and Support + Rest MD
+- [ ] T141 [US4] Ensure the Total row uses the same dynamic columns and continues to sum only the visible role columns
+
+### Manual Testing & QA for US4
+
+- [ ] T142 [US4] Manually test that toggling role checkboxes immediately changes which columns appear in the Output view while MD values remain mathematically correct
+- [ ] T143 [US4] Manually test that attempting to deselect all roles leaves at least one role selected and shows an explanatory message
+- [ ] T144 [US4] Manually test navigation: enter several features, switch to Output, verify numbers, switch back to Input, change a cost, and verify updated numbers on Output
+- [ ] T145 [US4] Run the full test suite (including new US4 tests) and ensure all tests pass
+
+**Checkpoint**: User Story 4 complete - Users can customize role visibility and navigate between Input/Output views!
+
+---
+
 ## Task Summary
 
-| Phase | Task Count | Estimated Duration | Dependencies |
-|-------|------------|-------------------|--------------|
-| Phase 1: Setup | T001-T008 (8 tasks) | 1-2 hours | None |
-| Phase 2: Foundational | T009-T020 (12 tasks) | 3-4 hours | Phase 1 |
-| Phase 3: US1 (MVP) | T021-T066 (46 tasks) | 4-6 hours | Phase 2 |
-| Phase 4: US2 | T067-T079 (13 tasks) | 2-3 hours | Phase 3 |
-| Phase 5: US3 | T080-T101 (22 tasks) | 2-3 hours | Phase 3 |
-| Phase 6: Polish | T102-T127 (26 tasks) | 2-3 hours | Phases 3-5 |
-| **Total** | **127 tasks** | **14-21 hours** | Sequential |
+| Phase                 | Task Count           | Estimated Duration | Dependencies |
+| --------------------- | -------------------- | ------------------ | ------------ |
+| Phase 1: Setup        | T001-T008 (8 tasks)  | 1-2 hours          | None         |
+| Phase 2: Foundational | T009-T020 (12 tasks) | 3-4 hours          | Phase 1      |
+| Phase 3: US1 (MVP)    | T021-T066 (46 tasks) | 4-6 hours          | Phase 2      |
+| Phase 4: US2          | T067-T079 (13 tasks) | 2-3 hours          | Phase 3      |
+| Phase 5: US3          | T080-T101 (22 tasks) | 2-3 hours          | Phase 3      |
+| Phase 6: Polish       | T102-T127 (26 tasks) | 2-3 hours          | Phases 3-5   |
+| Phase 7: US4          | T128-T145 (18 tasks) | 2-3 hours          | Phase 3      |
+| **Total**             | **145 tasks**        | **16-24 hours**    | Sequential   |
 
 ## Dependency Graph (User Story Completion Order)
 
@@ -320,29 +367,36 @@ Phase 2 (Foundational - Pure Functions)
     │       ↓
     │       ├─→ Phase 4 (US2 - Multiple Features)
     │       │
-    │       └─→ Phase 5 (US3 - Validation)
+    │       ├─→ Phase 5 (US3 - Validation)
+    │       │
+    │       └─→ Phase 7 (US4 - Role Selection & Output)
     │               ↓
     └───────────────┴─→ Phase 6 (Polish)
 ```
 
-**Critical Path**: Phase 1 → Phase 2 → Phase 3 (US1) is the MVP delivery path. Phases 4 and 5 can proceed in parallel after Phase 3 completes.
+**Critical Path**: Phase 1 → Phase 2 → Phase 3 (US1) is the MVP delivery path. Phases 4, 5, and 7 can proceed in parallel after Phase 3 completes.
 
 ## Parallel Execution Opportunities
 
 ### Phase 2 (After T011 tests written):
+
 - T016, T017, T018, T019 can be implemented in parallel (different functions)
 
 ### Phase 3 (After T021-T024 tests written):
+
 - T025-T029 (component file creation) can be done in parallel
 - T030-T032, T033-T037, T038-T044, T045-T050 (component implementation) can be done in parallel by different developers
 
 ### Phase 6:
+
 - T102-T107 (accessibility), T108-T110 (performance), T111-T114 (CSS), T115-T119 (docs) can all run in parallel
 
 ## Independent Testing Criteria
 
 ### US1 Independent Test
+
 ✅ Can run without US2/US3 features
+
 - Create new project in clean browser
 - Enter project name "Test Project"
 - Click "Add Feature"
@@ -354,7 +408,9 @@ Phase 2 (Foundational - Pure Functions)
 - Verify: Estimated MD updates to 3, output recalculates
 
 ### US2 Independent Test
+
 ✅ Can run after US1, without US3
+
 - Complete US1 test above
 - Click "Add Feature" 2 more times
 - Feature 2: Type="Data Synchronization", Project cost=50000, Hardware cost=0 (E=10)
@@ -365,7 +421,9 @@ Phase 2 (Foundational - Pure Functions)
 - Verify: Output table shows 2 rows, totals recalculated
 
 ### US3 Independent Test
+
 ✅ Can run after US1, without US2
+
 - Create new project, add one feature
 - Leave both cost fields empty
 - Verify: Estimated MD = 0, no errors shown
@@ -376,31 +434,57 @@ Phase 2 (Foundational - Pure Functions)
 - Change to valid value: 10000
 - Verify: Error clears, calculation proceeds
 
+### US4 Independent Test
+
+✅ Can run after US1, without US2/US3
+
+- Create new project, add one feature: "Use Case / API", costs 10000/0
+- Verify: All four role checkboxes are checked by default
+- Uncheck "QA (Quality Assurance)" and "BE (Back-End Developer)" checkboxes
+- Click "View Output" button
+- Verify: Output table shows only "SA (MD)" and "Support (MD)" columns (plus always-visible Feature, Rest MD, Support + Rest MD)
+- Verify: Numbers remain mathematically correct (SA=0, Support=1, Rest=1, Support+Rest=2)
+- Try to uncheck "SA" checkbox (leaving only Support selected)
+- Try to uncheck "Support" checkbox (the last remaining role)
+- Verify: Checkbox remains checked and inline message appears: "At least one role must be selected."
+- Click "Back to Input" button
+- Verify: Feature data preserved, checkboxes still show SA and Support selected
+- Change Project cost to 15000
+- Click "View Output" again
+- Verify: Output updates to show E=3 with correct role allocations
+
 ## Implementation Strategy
 
 ### Recommended MVP Scope (First Deliverable)
+
 **Deliver Phase 1 + Phase 2 + Phase 3 (US1) first** = ~8-12 hours of work
 
 This gives users:
+
 - ✅ Working single-feature calculator
 - ✅ Core calculation engine (100% tested)
 - ✅ Real-time reactivity
 - ✅ Basic accessible UI
 
 Then incrementally add:
+
 - **Iteration 2**: Phase 4 (US2) for multiple features + totals (~2-3 hours)
 - **Iteration 3**: Phase 5 (US3) for validation (~2-3 hours)
-- **Iteration 4**: Phase 6 for polish (~2-3 hours)
+- **Iteration 4**: Phase 7 (US4) for role selection & output navigation (~2-3 hours)
+- **Iteration 5**: Phase 6 for polish (~2-3 hours)
 
 ### Test-Driven Development Flow
+
 1. **RED**: Write test that fails (e.g., T012 - test calculateEstimatedMD before it exists)
 2. **GREEN**: Write minimal code to make test pass (T016 - implement function)
 3. **REFACTOR**: Clean up code while keeping tests green
 4. **REPEAT**: Move to next test
 
 ### Code Review Checkpoints
+
 - After Phase 2: Review all pure functions and unit tests (foundational, must be correct)
 - After Phase 3: Review MVP functionality (US1 complete)
+- After Phase 7: Review role selection and view navigation (US4 complete)
 - After Phase 6: Final review before deployment
 
 ---

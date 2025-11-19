@@ -1,36 +1,25 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 0.0.0 → 1.0.0 (Initial Constitution)
-Modified Principles: N/A (initial constitution)
-Added Sections:
-  - Core Principles (7 principles defined):
-    I. Frontend-Only Architecture (First Version)
-    II. Pure Function Business Logic (NON-NEGOTIABLE)
-    III. Table-Based Accessible UI
-    IV. Input Validation and Handling
-    V. Integer Manday Estimation with Round-Down
-    VI. Test-First Development (NON-NEGOTIABLE)
-    VII. Clear Documentation Separation
-  - Technical Constraints
-  - Quality Standards
-  - Governance
+Version Change: 1.0.0 → 1.0.1 (Clarification Amendment)
+Modified Principles:
+  - III. Table-Based Accessible UI: Added clarification about separate input/output views
+Added Sections: None
+Removed Sections: None
 
-Templates Updated:
-  ✅ plan-template.md - Constitution Check section updated with specific checkboxes for all 7 principles
-  ✅ spec-template.md - Already aligned (user stories, requirements, acceptance criteria)
-  ✅ tasks-template.md - Updated test requirements from OPTIONAL to MANDATORY; adjusted example file paths to TypeScript
-  ✅ checklist-template.md - Generic structure compatible (no changes needed)
-  ✅ agent-file-template.md - Not checked (generic agent template)
-
-Agent Files:
-  ✅ speckit.plan.agent.md - References constitution generically (no changes needed)
-  ✅ speckit.analyze.agent.md - References constitution generically (no changes needed)
-  ✅ speckit.constitution.agent.md - Self-referential instructions (no changes needed)
+Templates Requiring Updates:
+  ✅ plan-template.md - No changes required (generic principle check remains valid)
+  ✅ spec-template.md - No changes required (user stories unaffected)
+  ✅ tasks-template.md - No changes required (task structure unaffected)
 
 Follow-up TODOs: None
-Bump Rationale: MAJOR version (1.0.0) for initial constitution establishment
+
+Bump Rationale: PATCH version (1.0.0 → 1.0.1) for clarification of existing principle without semantic change. The amendment explicitly permits separate input/output views (e.g., tabbed interface or routing) while maintaining all existing constraints (semantic tables, keyboard navigation, visual distinction). This clarifies implementation flexibility without redefining the principle's core intent.
 ==================
+-->
+
+<!-- PREVIOUS VERSIONS:
+Version 1.0.0 (2025-11-18): Initial constitution establishment with 7 core principles
 -->
 
 # Integration Effort Estimator Constitution
@@ -69,6 +58,8 @@ User interface MUST prioritize simplicity and accessibility using table-based la
 - ARIA labels and roles where appropriate
 - Clear visual distinction between input and output sections
 
+The application MAY present separate views for input and output (e.g., an Input page and an Output page) as long as it remains a single-page React application. Each view MUST continue to use semantic tables for tabular data, preserve keyboard navigability, and maintain a clear visual distinction between input controls and calculated outputs.
+
 **Rationale**: Tables naturally represent tabular data (integration features, costs, role-based efforts), are familiar to business users, and provide inherent structure that aids accessibility.
 
 ### IV. Input Validation and Handling
@@ -102,7 +93,7 @@ Testing is mandatory and follows strict coverage requirements:
 - **Component tests**: At least one end-to-end test covering the main input/output flow
 - Tests MUST be written before or alongside implementation
 - All tests MUST pass before code review/merge
-- Use a recognized testing framework (e.g., Jest, Vitest for React/TypeScript)
+- Use a recognized testing framework (e.g., Jest)
 
 **Rationale**: Calculation accuracy is critical for business decisions. Pure functions make unit testing straightforward; component tests verify integration. Test-first prevents regression and documents expected behavior.
 
@@ -123,8 +114,8 @@ Project documentation MUST maintain clear boundaries between four artifact types
 
 - **Frontend Framework**: React 18+
 - **Language**: TypeScript 5+ with strict mode enabled
-- **Build Tool**: Vite or Create React App
-- **Testing**: Jest or Vitest (unit tests) + React Testing Library (component tests)
+- **Build Tool**: Create React App
+- **Testing**: Jest (unit tests) + React Testing Library (component tests)
 
 **Forbidden in Version 1.0**:
 
@@ -188,4 +179,4 @@ This Constitution supersedes all other development practices and guidelines for 
 - Version updates captured in Sync Impact Report
 - Templates (plan, spec, tasks) updated within same commit as constitution amendments
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-18 | **Last Amended**: 2025-11-18
+**Version**: 1.0.1 | **Ratified**: 2025-11-18 | **Last Amended**: 2025-11-19

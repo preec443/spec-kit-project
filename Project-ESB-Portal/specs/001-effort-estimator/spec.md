@@ -63,6 +63,24 @@ Users receive clear validation feedback when inputs are missing or invalid, with
 
 ---
 
+### User Story 4 - Configure Visible Roles and Navigate to Output (Priority: P2)
+
+A project manager selects which roles (System Analyst, Quality Assurance, Back-End Developer, Client Support Operation) are in scope for a project and then switches to a dedicated Output page to review the manday distribution only for those relevant roles. This allows the estimator to fit different staffing models without changing the underlying business rules.
+
+**Why this priority**: Provides flexibility for different organizational structures where not all roles may be relevant to every project. Enables cleaner output presentation by hiding irrelevant columns. Depends on core calculation functionality (US1) but enhances usability alongside US2.
+
+**Independent Test**: With several integration features entered, the user can toggle role checkboxes and switch between Input and Output views. The Output page immediately updates the visible columns and total row for the selected roles while keeping Estimated MD, Rest MD, and Support + Rest MD correct.
+
+**Acceptance Scenarios**:
+
+1. **Given** all four roles are checked by default, **When** the user unchecks 'Quality Assurance' in the Input view, **Then** the Output page hides the QA (MD) column for all feature rows and for the Total row, while SA/BE/Support, Rest MD, and Support + Rest MD remain visible and correctly calculated
+
+2. **Given** at least one role is currently selected, **When** the user attempts to uncheck the last remaining role, **Then** the system blocks this action or immediately re-enables that role and shows a message such as 'At least one role must be selected.'
+
+3. **Given** features and costs have already been entered in the Input view, **When** the user navigates to the Output page, **Then** the Output page displays the latest calculations; when the user navigates back to Input and edits costs or feature types, and then returns to Output, all role allocations and totals are updated without losing data
+
+---
+
 ### Edge Cases
 
 - **Zero costs**: When both Project cost and Hardware cost are 0 or empty, Estimated efforts should be 0 MD, and all role MD values should be 0
@@ -98,6 +116,11 @@ Users receive clear validation feedback when inputs are missing or invalid, with
 - **FR-018**: System MUST use the following percentage allocations for "Data Synchronization" type: SA=30%, QA=20%, BE=20%, Support=30%
 - **FR-019**: System MUST use the following percentage allocations for "Batch / File" type: SA=30%, QA=20%, BE=20%, Support=30%
 - **FR-020**: System MUST use the following percentage allocations for "ESB Feature" type: SA=20%, QA=30%, BE=20%, Support=30%
+- **FR-021**: System MUST provide a Role Selection control in the Input section with four checkboxes: 'System Analyst', 'Quality Assurance', 'Back-End Developer', and 'Client Support Operation'. All four MUST be selected by default when the application loads.
+- **FR-022**: System MUST ensure that at least one role checkbox is selected at all times. If the user attempts to deselect the final remaining role, the system MUST prevent that state and display an inline message such as 'At least one role must be selected.'
+- **FR-023**: System MUST respect role selection when rendering the output table. The Manday output table MUST only display columns for the roles that are currently selected. 'Rest MD' and 'Support + Rest MD' columns MUST always be visible regardless of role selection.
+- **FR-024**: System MUST provide simple navigation between an Input view and an Output view within the same React SPA. The default landing view MUST be the Input view. From the Input view the user can navigate to the Output view (e.g., via a button labeled 'View Output'), and from the Output view they can return to the Input view (e.g., via 'Back to Input').
+- **FR-025**: Role selection MUST NOT change the underlying manday calculations. Estimated efforts (MD) and role allocations (SA, QA, BE, Support, Rest MD, Support + Rest MD) MUST still be calculated using the existing formulas and feature-type-specific percentages; role selection only controls which role columns are visible in the output table.
 
 ### Key Entities
 
@@ -111,12 +134,16 @@ Users receive clear validation feedback when inputs are missing or invalid, with
   - Estimated efforts (MD): calculated integer, derived from costs
 
 - **Role Allocation**: Represents the distribution of mandays across roles for a feature. Attributes:
+
   - System Analyst MD (integer)
   - Quality Assurance MD (integer)
   - Back-End Developer MD (integer)
   - Client Support Operation MD (integer)
   - Rest MD (integer, absorbs rounding remainder)
   - Support + Rest MD (integer, combined support effort)
+
+- **Role Visibility**: Represents which standard roles are currently displayed in the output table. Attributes:
+  - visibleRoles: array of role keys (sa, qa, be, support) with at least one entry at all times
 
 ## Success Criteria _(mandatory)_
 
@@ -142,6 +169,7 @@ Users receive clear validation feedback when inputs are missing or invalid, with
 - **Divisor constant**: The 5,000 THB divisor in the MD formula is a fixed business rule and will not need to be configurable in v1.0
 - **Role definitions**: The four roles (SA, QA, BE, Support) are standard across all projects; custom roles not needed in v1.0
 - **Percentage allocations**: The five feature types and their percentage allocations are comprehensive and fixed; no custom feature types needed in v1.0
+- **Role visibility**: The four standard roles (SA, QA, BE, Support) remain fixed for calculations, but users MAY toggle the visibility of each role in the output table per project. Role visibility is a presentation concern only and does not alter the underlying percentage allocations or formulas.
 - **Data persistence**: In v1.0, data only needs to persist during the browser session (in-memory state); no save/load functionality required unless explicitly requested
 - **Browser support**: Modern browsers (Chrome, Firefox, Safari, Edge) from the last 2 years are the target; no IE11 support needed
 - **User authentication**: Not required for v1.0; application is accessible without login

@@ -52,8 +52,10 @@ src/
 ├── components/
 │   ├── App.tsx                    # Root component, manages project state
 │   ├── ProjectForm.tsx            # Project name input
+│   ├── RoleSelector.tsx           # Role visibility checkboxes
 │   ├── FeatureInputTable.tsx      # Table of feature input rows
 │   ├── FeatureRow.tsx             # Single feature input row (type, costs)
+│   ├── OutputView.tsx             # Output page wrapper with navigation
 │   └── MandayTable.tsx            # Output table with role-based MD
 ├── lib/
 │   ├── calculations.ts            # Pure functions for all MD calculations
@@ -102,6 +104,7 @@ No constitution violations. All principles are satisfied:
 ```
 App
 ├── ProjectForm (project name input)
+├── RoleSelector (role checkboxes)
 ├── FeatureInputTable
 │   └── FeatureRow[] (one per feature)
 │       ├── Feature type dropdown
@@ -109,7 +112,8 @@ App
 │       ├── Hardware cost input
 │       ├── Estimated MD display (calculated)
 │       └── Delete button
-└── MandayTable (output table with totals)
+└── OutputView
+    └── MandayTable (output table with totals and dynamic role columns)
 ```
 
 ### State Management
@@ -124,11 +128,20 @@ interface Feature {
   hardwareCost: number; // Default 0
 }
 
+type RoleKey = "sa" | "qa" | "be" | "support";
+
 interface AppState {
   projectName: string;
   features: Feature[];
+  selectedRoles: RoleKey[]; // at least one role, default ['sa','qa','be','support']
+  activeView: "input" | "output"; // default 'input'
 }
 ```
+
+**Implementation Notes**:
+
+- `selectedRoles` is updated by the RoleSelector component via callbacks.
+- `activeView` is toggled by navigation buttons (e.g., 'View Output' and 'Back to Input').
 
 **Data Flow**:
 
@@ -255,14 +268,21 @@ const estimatedMD = calculateEstimatedMD(
 - Render output table with role-based MD allocations
 - One row per feature + Total summary row
 - Columns: Feature, SA (MD), QA (MD), BE (MD), Support (MD), Rest MD, Support + Rest MD
+- Dynamically show/hide role columns based on selected roles
 
 **Props**:
 
 ```typescript
 interface MandayTableProps {
   features: Feature[];
+  selectedRoles: RoleKey[]; // controls which role columns are visible
 }
 ```
+
+**Implementation Notes**:
+
+- MandayTable MUST always display 'Feature', 'Rest MD', and 'Support + Rest MD' columns.
+- It MUST conditionally render 'SA (MD)', 'QA (MD)', 'BE (MD)', and 'Support (MD)' columns depending on whether each role key is present in selectedRoles.
 
 **Calculation Flow**:
 
@@ -283,6 +303,56 @@ const totals = calculateTotals(features);
 - All MD values displayed as integers (no decimals)
 - Total row uses bold or different styling for distinction
 - Empty state: if no features, show message "No features added yet"
+
+---
+
+#### 6. RoleSelector.tsx
+
+**Responsibilities**:
+
+- Render four checkboxes for System Analyst, Quality Assurance, Back-End Developer, and Client Support Operation.
+- Ensure at least one checkbox remains selected by preventing the user from unchecking the last selected role and showing an inline helper message when that happens.
+
+**Props**:
+
+```typescript
+interface RoleSelectorProps {
+  selectedRoles: RoleKey[];
+  onChange: (nextRoles: RoleKey[]) => void;
+}
+```
+
+**Implementation Notes**:
+
+- All four checkboxes MUST be checked by default when the application loads (per FR-021).
+- When user attempts to uncheck the last remaining role, prevent the action and display inline message: "At least one role must be selected." (per FR-022)
+- Use semantic HTML with `<input type="checkbox">` and associated `<label>` elements.
+- Apply ARIA attributes for accessibility.
+
+---
+
+#### 7. OutputView.tsx
+
+**Responsibilities**:
+
+- Render the MandayTable component based on the current features and selectedRoles.
+- Provide a 'Back to Input' button that sets activeView back to 'input'.
+
+**Props**:
+
+```typescript
+interface OutputViewProps {
+  features: Feature[];
+  selectedRoles: RoleKey[];
+  onBackToInput: () => void;
+}
+```
+
+**Implementation Notes**:
+
+- OutputView is a wrapper component that contains navigation controls and the MandayTable.
+- The 'Back to Input' button MUST be keyboard accessible and clearly labeled (per FR-024).
+- OutputView receives selectedRoles from App state and passes to MandayTable for column filtering.
 
 ---
 
@@ -655,38 +725,68 @@ it("shows error for negative cost", async () => {
 4. Test with keyboard-only navigation
 5. Verify table semantics (`<table>`, `<thead>`, `<th scope="col">`)
 
+### Phase 7: User Story 4 - Role Selection and Output Navigation
+
+**Purpose**: Add role selection checkboxes and separate Output view after US1–US3 are complete.
+
+**Implementation Steps**:
+
+1. Add `selectedRoles: RoleKey[]` and `activeView: 'input' | 'output'` to App state
+2. Create RoleSelector component with four checkboxes and validation logic
+3. Create OutputView wrapper component with 'Back to Input' button
+4. Update MandayTable to accept `selectedRoles` prop and conditionally render role columns
+5. Add navigation buttons in App: 'View Output' (shown in input view) and wire to OutputView
+6. Write component tests ensuring:
+   - Role checkboxes control visible columns in output table
+   - At least one role must remain selected at all times
+   - Navigation between Input and Output views preserves all state (features, costs, project name)
+   - Output table updates immediately when roles are toggled
+7. Update App to conditionally render either input components or OutputView based on activeView state
+
+**Testing Requirements**:
+
+- Test US4 Scenario 1: Uncheck a role (e.g., QA) and verify column hidden in Output view
+- Test US4 Scenario 2: Attempt to uncheck last role and verify prevention + message
+- Test US4 Scenario 3: Navigate Input → Output → Input with data, verify state preserved
+
 ---
 
 ## Mapping Spec to Implementation
 
 ### Functional Requirements → Code Mapping
 
-| Requirement                     | Implementation                                                          |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| FR-001: Project name input      | `ProjectForm.tsx` renders `<input type="text" required>`                |
-| FR-002: Add multiple features   | `App.tsx` state: `features: Feature[]`; `addFeature()` handler          |
-| FR-003: Feature type dropdown   | `FeatureRow.tsx` renders `<select>` with 5 options from `FEATURE_TYPES` |
-| FR-004: Cost input fields       | `FeatureRow.tsx` renders two `<input type="number">` fields             |
-| FR-005: Empty = 0               | `validateCostInput('')` returns `numericValue: 0`                       |
-| FR-006: Non-negative validation | `validateCostInput()` checks `< 0`; `FeatureRow.tsx` displays error     |
-| FR-007: MD formula              | `calculateEstimatedMD()` implements `Math.floor((c1 + c2) / 5000)`      |
-| FR-008: Math.floor() usage      | All calculation functions use `Math.floor()`                            |
-| FR-009: Role percentages        | `calculateRoleAllocations()` applies `ROLE_PERCENTAGES` config          |
-| FR-010: Rest MD formula         | `calculateRoleAllocations()` computes `E - (sa + qa + be + support)`    |
-| FR-011: Support + Rest MD       | `calculateRoleAllocations()` computes `support + restMD`                |
-| FR-012: Output table columns    | `MandayTable.tsx` renders 7-column `<table>`                            |
-| FR-013: One row per feature     | `MandayTable.tsx` maps `features.map((f) => <tr>...)`                   |
-| FR-014: Total row               | `MandayTable.tsx` calls `calculateTotals()` and renders footer row      |
-| FR-015: Real-time reactivity    | React re-renders on state change; calculations run each render          |
-| FR-016-020: Type percentages    | `ROLE_PERCENTAGES` constant defines all 5 types' allocations            |
+| Requirement                     | Implementation                                                           |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| FR-001: Project name input      | `ProjectForm.tsx` renders `<input type="text" required>`                 |
+| FR-002: Add multiple features   | `App.tsx` state: `features: Feature[]`; `addFeature()` handler           |
+| FR-003: Feature type dropdown   | `FeatureRow.tsx` renders `<select>` with 5 options from `FEATURE_TYPES`  |
+| FR-004: Cost input fields       | `FeatureRow.tsx` renders two `<input type="number">` fields              |
+| FR-005: Empty = 0               | `validateCostInput('')` returns `numericValue: 0`                        |
+| FR-006: Non-negative validation | `validateCostInput()` checks `< 0`; `FeatureRow.tsx` displays error      |
+| FR-007: MD formula              | `calculateEstimatedMD()` implements `Math.floor((c1 + c2) / 5000)`       |
+| FR-008: Math.floor() usage      | All calculation functions use `Math.floor()`                             |
+| FR-009: Role percentages        | `calculateRoleAllocations()` applies `ROLE_PERCENTAGES` config           |
+| FR-010: Rest MD formula         | `calculateRoleAllocations()` computes `E - (sa + qa + be + support)`     |
+| FR-011: Support + Rest MD       | `calculateRoleAllocations()` computes `support + restMD`                 |
+| FR-012: Output table columns    | `MandayTable.tsx` renders 7-column `<table>`                             |
+| FR-013: One row per feature     | `MandayTable.tsx` maps `features.map((f) => <tr>...)`                    |
+| FR-014: Total row               | `MandayTable.tsx` calls `calculateTotals()` and renders footer row       |
+| FR-015: Real-time reactivity    | React re-renders on state change; calculations run each render           |
+| FR-016-020: Type percentages    | `ROLE_PERCENTAGES` constant defines all 5 types' allocations             |
+| FR-021: Role selection control  | `RoleSelector.tsx` renders 4 checkboxes, all selected by default         |
+| FR-022: At least one role       | `RoleSelector.tsx` prevents unchecking last role, shows inline message   |
+| FR-023: Respect role selection  | `MandayTable.tsx` conditionally renders columns based on `selectedRoles` |
+| FR-024: Input/Output navigation | `App.tsx` manages `activeView` state; buttons toggle between views       |
+| FR-025: Calculations unchanged  | Role selection only affects `MandayTable` display, not calculation logic |
 
 ### User Stories → Components Mapping
 
-| User Story                      | Primary Components                 | Key Functions                                      |
-| ------------------------------- | ---------------------------------- | -------------------------------------------------- |
-| US1: Single feature calculation | `App`, `FeatureRow`, `MandayTable` | `calculateEstimatedMD`, `calculateRoleAllocations` |
-| US2: Multiple features          | `FeatureInputTable`, `MandayTable` | `calculateTotals`                                  |
-| US3: Validation                 | `FeatureRow` (error display)       | `validateCostInput`                                |
+| User Story                      | Primary Components                          | Key Functions                                      |
+| ------------------------------- | ------------------------------------------- | -------------------------------------------------- |
+| US1: Single feature calculation | `App`, `FeatureRow`, `MandayTable`          | `calculateEstimatedMD`, `calculateRoleAllocations` |
+| US2: Multiple features          | `FeatureInputTable`, `MandayTable`          | `calculateTotals`                                  |
+| US3: Validation                 | `FeatureRow` (error display)                | `validateCostInput`                                |
+| US4: Role selection & Output    | `RoleSelector`, `OutputView`, `MandayTable` | (UI state management, no new calc functions)       |
 
 ---
 

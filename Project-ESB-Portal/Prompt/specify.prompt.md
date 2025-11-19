@@ -1,91 +1,60 @@
 /speckit.specify
-I want to build a web application called "Integration Effort Estimator"
-for estimating Mandays (MD) based on integration features.
+Create a NEW feature spec called "002-effort-estimator".
 
-Input section:
+This feature is an Integration Effort Estimator web application.
 
-1. Project name:
+High-level behavior:
 
-   - A required text field for the project name.
+- Input page:
 
-2. Integration features:
+  - Project name (required text field).
+  - Integration Features table, where each row has:
+    - Feature Type (Use Case / API, Topic / Event, Data Synchronization, Batch / File, ESB Feature)
+    - Summation of Project cost (THB)
+    - Summation of Hardware cost (THB)
+  - Estimated efforts (MD) per feature is calculated as:
+    MD = ROUNDDOWN( (Project cost + Hardware cost) / 5000 )
+  - Role Selection section with checkboxes:
+    - System Analyst
+    - Quality Assurance
+    - Back-End Developer
+    - Client Support Operation
+      All roles are checked by default, at least one role must remain selected.
 
-   - The user can add multiple rows.
-   - Each row has:
-     - Feature type (required, single select) with these options:
-       - Use Case / API
-       - Topic / Event
-       - Data Synchronization
-       - Batch / File
-       - ESB Feature
-     - Summation of Project cost (THB), numeric, non-negative.
-     - Summation of Hardware cost (THB), numeric, non-negative.
-   - For each row the app automatically computes:
-     Estimated efforts (MD) = ROUNDDOWN(
-     (Summation of Project cost + Summation of Hardware cost) / 5000
-     )
+- Output page:
+  - Separate view (within the same React SPA) that shows a Manday table.
+  - Columns: Feature, SA (MD), QA (MD), BE (MD), Support (MD), Rest MD, Support + Rest MD.
+  - Only columns for the selected roles are visible; Rest MD and Support + Rest MD are always visible.
+  - One row per feature + a Total summary row.
 
-3. Roles used in the output:
-   - System Analyst (SA)
-   - Quality Assurance (QA)
-   - Back-End Developer (BE)
-   - Client Support Operation (Support)
+Role allocation rules:
 
-Output section:
-Show a Manday table like my sketch. Columns:
+- Use Case / API:
+  SA 30%, QA 0%, BE 0%, Support 70%
+- Topic / Event:
+  SA 30%, QA 0%, BE 0%, Support 70%
+- Data Synchronization:
+  SA 30%, QA 20%, BE 20%, Support 30%
+- Batch / File:
+  SA 30%, QA 20%, BE 20%, Support 30%
+- ESB Feature:
+  SA 20%, QA 30%, BE 20%, Support 30%
 
-- Feature
-- SA (MD)
-- QA (MD)
-- BE (MD)
-- Support (MD)
-- Rest MD
-- Support + Rest MD
+For each feature, compute:
 
-For each feature row:
-Let E = Estimated efforts (MD) for that row.
-Use rounddown behavior for all multiplications (like Excel ROUNDDOWN).
+- For each role: roleMD = ROUNDDOWN(E \* percentage)
+- Rest MD = E - (SA + QA + BE + Support)
+- Support + Rest MD = Support + Rest MD
 
-1. Use Case / API
+IMPORTANT TECH CONSTRAINTS:
 
-   - SA = ROUNDDOWN(E \* 0.30)
-   - QA = ROUNDDOWN(E \* 0.00)
-   - BE = ROUNDDOWN(E \* 0.00)
-   - Support = ROUNDDOWN(E \* 0.70)
-   - Rest MD = E - (SA + QA + BE + Support)
-   - Support + Rest MD = Support + Rest MD
+- Frontend-only React + TypeScript SPA.
+- Do NOT mention or assume any specific build tool (no Vite, no CRA, no Next.js by name).
+- Testing should be described generically (example: Jest + React Testing Library), but keep it tool-agnostic if possible.
 
-2. Topic / Event
+Please:
 
-   - Same percentages and formulas as Use Case / API.
-
-3. Data Synchronization
-
-   - SA = ROUNDDOWN(E \* 0.30)
-   - QA = ROUNDDOWN(E \* 0.20)
-   - BE = ROUNDDOWN(E \* 0.20)
-   - Support = ROUNDDOWN(E \* 0.30)
-   - Rest MD & Support + Rest MD same pattern.
-
-4. Batch / File
-
-   - SA = ROUNDDOWN(E \* 0.30)
-   - QA = ROUNDDOWN(E \* 0.20)
-   - BE = ROUNDDOWN(E \* 0.20)
-   - Support = ROUNDDOWN(E \* 0.30)
-   - Rest MD & Support + Rest MD same pattern.
-
-5. ESB Feature
-   - SA = ROUNDDOWN(E \* 0.20)
-   - QA = ROUNDDOWN(E \* 0.30)
-   - BE = ROUNDDOWN(E \* 0.20)
-   - Support = ROUNDDOWN(E \* 0.30)
-   - Rest MD & Support + Rest MD same pattern.
-
-Also generate a summary row at the bottom:
-
-- For each MD column, sum values from all feature rows.
-- The Feature cell in the summary row should show the label "Total".
-
-Please organize the spec using Spec Kit’s normal structure:
-overview, actors, inputs, outputs, flows, edge cases, and acceptance scenarios.
+- Create a new folder under specs/ named exactly `002-effort-estimator`
+  (if your scripts choose another folder name, still make it clear in the generated spec.md
+  that the Feature Branch name is `002-effort-estimator`).
+- Write the specification into specs/002-effort-estimator/spec.md.

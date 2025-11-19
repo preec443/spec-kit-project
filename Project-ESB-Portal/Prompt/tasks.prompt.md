@@ -1,12 +1,21 @@
 /speckit.tasks
-Generate a task list to implement the Integration Effort Estimator using
-the current specification and plan. Include phases for:
+Generate a task breakdown for feature branch `002-effort-estimator`
+based on specs/002-effort-estimator/spec.md and plan.md.
 
-- Project setup and React scaffolding.
-- Implementing pure calculation functions for MD and role distributions.
-- Building the input form for project name and integration feature rows.
-- Building the Manday output table with summary row.
-- Adding validation and error handling for numeric inputs.
-- Writing unit tests and component tests.
-- Final UI polish and documentation updates.
-  Group tasks into phases and make them as actionable as possible.
+Requirements:
+
+- Frontend-only React + TypeScript.
+- Do NOT mention Vite or Vitest anywhere in the tasks.
+- In the setup phase, describe project creation generically:
+  "Initialize a React + TypeScript project with the team's chosen build tool."
+- For testing, you may mention Jest + React Testing Library as examples,
+  but phrase them as "React-compatible test runner" so they are not mandatory.
+- Include phases for:
+  - Project setup
+  - Calculation helpers (MD + role allocation)
+  - Input page (project + features + role checkboxes)
+  - Output page (Manday table + navigation)
+  - Validation and UX polish
+  - Accessibility and documentation.
+
+Write the result into specs/002-effort-estimator/tasks.md.

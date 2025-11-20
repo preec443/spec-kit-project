@@ -1,6 +1,6 @@
 /speckit.plan
-Create an implementation plan for feature branch `002-effort-estimator`
-using specs/002-effort-estimator/spec.md.
+Create an implementation plan for feature branch `003-effort-estimator`
+using specs/003-effort-estimator/spec.md.
 
 Technical constraints:
 
@@ -12,4 +12,4 @@ Technical constraints:
 - Include sections for: component hierarchy, state model, calculation helpers, and basic testing strategy
   (Jest + React Testing Library as an example, but not required).
 
-Write the plan into specs/002-effort-estimator/plan.md.
+Write the plan into specs/003-effort-estimator/plan.md.

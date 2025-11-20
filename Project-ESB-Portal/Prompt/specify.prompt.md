@@ -1,5 +1,5 @@
 /speckit.specify
-Create a NEW feature spec called "002-effort-estimator".
+Create a NEW feature spec called "003-effort-estimator".
 
 This feature is an Integration Effort Estimator web application.
 
@@ -13,7 +13,7 @@ High-level behavior:
     - Summation of Project cost (THB)
     - Summation of Hardware cost (THB)
   - Estimated efforts (MD) per feature is calculated as:
-    MD = ROUNDDOWN( (Project cost + Hardware cost) / 5000 )
+    MD = ROUNDUP( (Project cost + Hardware cost) / 5000 )
   - Role Selection section with checkboxes:
     - System Analyst
     - Quality Assurance
@@ -22,10 +22,12 @@ High-level behavior:
       All roles are checked by default, at least one role must remain selected.
 
 - Output page:
+  - Display Project name at the top.
   - Separate view (within the same React SPA) that shows a Manday table.
   - Columns: Feature, SA (MD), QA (MD), BE (MD), Support (MD), Rest MD, Support + Rest MD.
   - Only columns for the selected roles are visible; Rest MD and Support + Rest MD are always visible.
   - One row per feature + a Total summary row.
+  - In the Total summary row, do not display the numeric values for Client Support Operation and Rest MD. Also set the background color of these cells to grey.
 
 Role allocation rules:
 
@@ -42,8 +44,10 @@ Role allocation rules:
 
 For each feature, compute:
 
-- For each role: roleMD = ROUNDDOWN(E \* percentage)
-- Rest MD = E - (SA + QA + BE + Support)
+- For each selected role:
+  roleMD = ROUNDDOWN(E \* percentage)
+- Rest MD = E – (sum of roleMD from selected roles)
+  (e.g., if only SA and QA are selected → Rest MD = E – (SA + QA))
 - Support + Rest MD = Support + Rest MD
 
 IMPORTANT TECH CONSTRAINTS:
@@ -54,7 +58,7 @@ IMPORTANT TECH CONSTRAINTS:
 
 Please:
 
-- Create a new folder under specs/ named exactly `002-effort-estimator`
+- Create a new folder under specs/ named exactly `003-effort-estimator`
   (if your scripts choose another folder name, still make it clear in the generated spec.md
-  that the Feature Branch name is `002-effort-estimator`).
-- Write the specification into specs/002-effort-estimator/spec.md.
+  that the Feature Branch name is `003-effort-estimator`).
+- Write the specification into specs/003-effort-estimator/spec.md.

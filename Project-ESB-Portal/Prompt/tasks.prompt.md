@@ -1,6 +1,6 @@
 /speckit.tasks
-Generate a task breakdown for feature branch `002-effort-estimator`
-based on specs/002-effort-estimator/spec.md and plan.md.
+Generate a task breakdown for feature branch `003-effort-estimator`
+based on specs/003-effort-estimator/spec.md and plan.md.
 
 Requirements:
 
@@ -18,4 +18,4 @@ Requirements:
   - Validation and UX polish
   - Accessibility and documentation.
 
-Write the result into specs/002-effort-estimator/tasks.md.
+Write the result into specs/003-effort-estimator/tasks.md.
